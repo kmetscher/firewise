@@ -5,15 +5,10 @@ class Fire {
     private string $name;
 
     private int $categoryId;
-    private ?int $predictedCategoryId;
     private string $category;
-    private ?string $predictedCategory = null;
 
     private int $causeId;
     private string $cause;
-    
-    private string $reportingUnitId;
-    private string $reportingUnitName;
     
     private DateTimeImmutable $discoveryDate;
     private int $discoveryDoy;
@@ -24,23 +19,8 @@ class Fire {
     private float $latitude;
     private float $longitude;
     
-    private int $ownerId;
-    private string $owner;
-    
     private string $state;
-    private string $county;
     
-    private string $shape;
-
-    private function categorize(int $categoryId): void {
-        if ($categoryId == 0) {
-            $this->predictedCategory = "Natural";
-        }
-        else {
-            $this->predictedCategory = "Human-caused";
-        }
-    }
-
     public function __construct(array $vals) {
         $this->id = $vals["OBJECTID"];
         if ($vals["FIRE_NAME"]) {
@@ -63,9 +43,6 @@ class Fire {
                 $this->category = "Human-caused";
         }
         
-        $this->reportingUnitId = $vals["SOURCE_REPORTING_UNIT"];
-        $this->reportingUnitName = $vals["SOURCE_REPORTING_UNIT_NAME"];
-        
         $discoveryDate = DateTime::createFromFormat("Y-m-d", $vals["DISCOVERY_DATE"]);
         $containmentDate = DateTime::createFromFormat("Y-m-d", $vals["CONT_DATE"]);
 
@@ -82,22 +59,10 @@ class Fire {
         $this->latitude = $vals["LATITUDE"];
         $this->longitude = $vals["LONGITUDE"];
         
-        $this->ownerId = $vals["OWNER_CODE"];
-        $this->owner = $vals["OWNER_DESCR"];
-        
         $this->state = $vals["STATE"];
-        
-        if ($vals["COUNTY"]) {
-            $this->county = $vals["FIPS_NAME"];
-        } 
-        else {
-            $this->county = "Unknown";
-        }
-        
-        $this->shape = $vals["Shape"];
     }
 
-    public function getIndependentAttributes(bool $withPreCat): array {
+    public function getIndependentAttributes(): array {
         $attrs = [
             $this->latitude, 
             $this->longitude, 
@@ -106,11 +71,7 @@ class Fire {
             $this->containmentDate->getTimestamp(),
             $this->containmentDoy,
             $this->size,
-            $this->ownerId,
         ];
-        if ($withPreCat) {
-            $attrs[] = $this->predictedCategoryId;
-        }
         return $attrs;
     }
 
@@ -122,22 +83,17 @@ class Fire {
         return $this->categoryId;
     }
 
-    public function setPredictedCategoryId(int $categoryId): void {
-        $this->predictedCategoryId = $categoryId;
-        $this->categorize($categoryId);
-    }
-
-    public function getPredictedCategoryId(): int {
-        return $this->predictedCategoryId;
-    }
-
     public function prettyPrint(): void {
-        echo "#" . $this->id . ": " . $this->name . "\n";
+        echo "#" . $this->id . ": " . $this->name . "(" . $this->state . ")\n";
+        echo "    $this->latitude, $this->longitude\n";
         echo "    " . $this->discoveryDate->format("Y-m-d") . " to " . $this->containmentDate->format("Y-m-d") . "\n";
         echo "    Burn size: " . $this->size . "\n";
         echo "    Category: " . $this->category . "\n";
-        echo "        Predicted category: " . $this->predictedCategory . "\n";
-        echo "    Cause: $this->cause\n";
+        echo "    Known cause: $this->cause\t\n";
+    }
+
+    public function toJson() {
+    
     }
 }
 

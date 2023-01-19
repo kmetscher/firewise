@@ -2,20 +2,38 @@
 require_once("../db/db.php");
 require_once("../model/fire.php");
 require_once("../vendor/autoload.php");
+
 use Phpml\Classification\Ensemble\RandomForest;
 use Phpml\ModelManager;
 
+function stopwatch(string $output, bool $full = false): void {
+    $fullFormat = "Y-m-d H:i:s";
+    $shortFormat = "H:i:s";
+    $time = new DateTimeImmutable();
+    if ($full) {
+        echo $time->format($fullFormat) . ": ";
+    }
+    else {
+        echo $time->format($shortFormat) . ": ";
+    }
+    echo "$output\n";
+}
+
+stopwatch("Firing up", true);
+
 $db = new DB();
 $mm = new ModelManager();
-$time = new DateTimeImmutable();
-$format = "Y-m-d H:i:s";
-$stepFormat = "H:i:s";
-echo $time->format($format) . ": ";
-echo "Fetching fires...\n";
-$fires = $db->getTrainingSet(2000);
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Done.\n";
+
+stopwatch("Fetching fires");
+$fires = $db->getBalancedSet();
+shuffle($fires);
+$trainFires = array_slice($fires, 0, floor(sizeof($fires) * 0.66));
+$testFires = array_slice($fires, floor(sizeof($fires) * 0.66));
+stopwatch("Done (" . sizeof($trainFires) . ")");
+
+$classifierHN = new RandomForest(100);
+$classifierRForestHuman = new RandomForest(100);
+$classifierRForestNatural = new RandomForest(100);
 
 $humanSamples = [];
 $naturalSamples = [];
@@ -26,25 +44,20 @@ $uncatSamples = [];
 $categoryLabels = [];
 
 $trainingFires = 0;
-
-foreach ($fires as $fire) {
-    $uncatSamples[] = $fire->getIndependentAttributes(false);
+stopwatch("Splitting samples");
+foreach ($trainFires as $fire) {
+    $uncatSamples[] = $fire->getIndependentAttributes();
     $categoryLabels[] = $fire->getCategoryId();
 }
 
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Training human/natural classifier...\n";
-$classifierHN = new RandomForest();
+stopwatch("Training human/natural split forest");
 $classifierHN->train($uncatSamples, $categoryLabels);
+stopwatch("Saving brain");
 $mm->saveToFile($classifierHN, "firstround.brain");
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Done.\n";
 
-foreach ($fires as $fire) {
+stopwatch("Splitting categories on training set");
+foreach ($trainFires as $fire) {
     $trainingFires++;
-    $fire->setPredictedCategoryId($fire->getCategoryId());
     switch ($fire->getCategoryId()) {
         case 0:
             $naturalSamples[] = $fire->getIndependentAttributes(true);
@@ -56,242 +69,130 @@ foreach ($fires as $fire) {
     }
 }
 
-/*
-$trainingSet = new ArrayDataset($samples, $labels);
-$selector = new SelectKBest(1);
-$selector->fit($trainingSet->getSamples(), $trainingSet->getTargets());
-$selector->transform($trainingSet->getSamples());
-*/
-/*
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Training decision tree...\n";
-$classifierDTreeHuman = new DecisionTree();
-$classifierDTreeHuman->train($humanSamples, $humanLabels);
-$time = new DateTimeImmutable();
-//echo $time->format($stepFormat) . ": ";
-//echo "Training decision tree (natural)...\n";
-$classifierDTreeNatural = new DecisionTree();
-$classifierDTreeNatural->train($naturalSamples, $naturalLabels);
-*/
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Training random forest (human-caused)...\n";
-$classifierRForestHuman = new RandomForest();
-$classifierRForestHuman->train($humanSamples, $humanLabels);
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Done.\n";
-echo $time->format($stepFormat) . ": ";
-echo "Training random forest (natural)...\n";
-$classifierRForestNatural = new RandomForest();
-$classifierRForestNatural->train($naturalSamples, $naturalLabels);
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Done.\n";
-/*
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Training Bayes...\n";
-$classifierBayesHuman = new NaiveBayes();
-$classifierBayesHuman->train($humanSamples, $humanLabels);
-$time = new DateTimeImmutable();
-//echo $time->format($stepFormat) . ": ";
-//echo "Training Bayes (natural)...\n";
-$classifierBayesNatural = new NaiveBayes();
-$classifierBayesNatural->train($naturalSamples, $naturalLabels);
+$columns = ["latitude", "longitude", "discoveryDate", "discoveryDoy", "containmentDate", "containmentDoy", "size"];
+$classifierHN->setColumnNames($columns);
+$classifierRForestHuman->setColumnNames($columns);
+$classifierRForestHuman->setSubsetRatio(1.0);
+$classifierRForestNatural->setColumnNames($columns);
+$classifierRForestNatural->setSubsetRatio(1.0);
 
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Training K nearest...\n";
-$classifierKHuman = new KNearestNeighbors();
-$classifierKHuman->train($humanSamples, $humanLabels);
-$time = new DateTimeImmutable();
-//echo $time->format($stepFormat) . ": ";
-//echo "Training K nearest (natural)...\n";
-$classifierKNatural = new KNearestNeighbors();
-$classifierKNatural->train($naturalSamples, $naturalLabels);*/
+stopwatch("Training human-caused forest");
+$classifierRForestHuman->train($humanSamples, $humanLabels);
+stopwatch("Saving brain");
+$mm->saveToFile($classifierRForestHuman, "secondroundhuman.brain");
+
+stopwatch("Training natural-caused forest");
+$classifierRForestNatural->train($naturalSamples, $naturalLabels);
+stopwatch("Saving brain");
+$mm->saveToFile($classifierRForestNatural, "secondroundnatural.brain");
 
 $total = 0;
-
 $accuracyHN = 0;
-//$accuracyDTree = 0;
 $accuracyRForest = 0;
-//$accuracyBayes = 0;
-//$accuracyNearestK = 0;
 
 $accuracyByCause = [
     "Debris Burning" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
     "Lightning" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
     "Equipment Use" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
     "Arson" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
     "Campfire" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
-    /*"Children" => [
-        "Total" => 0,
-        "DTree" => 0,
-        "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
-    ],*/
     "Smoking" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
     "Railroad" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
     "Powerline" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
     "Structure" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
     "Fireworks" => [
         "Total" => 0,
-        "DTree" => 0,
         "RForest" => 0,
-        "Bayes" => 0,
-        "NearestK" => 0,
     ],
 ];
 
-$testFires = $db->getTestingSet(2000);
-
-$time = new DateTimeImmutable();
-echo $time->format($stepFormat) . ": ";
-echo "Predicting...\n";
+stopwatch("Predicting");
 foreach ($testFires as $fire) {
-    if ($fire) {
-        $total++;
-        
-        $category = $classifierHN->predict($fire->getIndependentAttributes(false));
-        $fire->setPredictedCategoryId($category);
-        if ($fire->getCategoryId() == $fire->getPredictedCategoryId()) {
-            $accuracyHN++;
-        }
+    $total++;
+    
+    $category = $classifierHN->predict($fire->getIndependentAttributes());
+    if ($fire->getCategoryId() == $category) {
+        $accuracyHN++;
+    }
 
-        $cause = $fire->getCause();
-        $accuracyByCause[$cause]["Total"]++;
+    $cause = $fire->getCause();
+    $accuracyByCause[$cause]["Total"]++;
 
-        if ($category == 0) {
-            //$predictionBayes = $classifierBayesNatural->predict($fire->getIndependentAttributes(true));
-            //$predictionNearestK = $classifierKNatural->predict($fire->getIndependentAttributes(true));
-            //$predictionDTree = $classifierDTreeNatural->predict($fire->getIndependentAttributes(true));
-            $predictionRForest = $classifierRForestNatural->predict($fire->getIndependentAttributes(true));
-        }
-        else {
-            //$predictionBayes = $classifierBayesHuman->predict($fire->getIndependentAttributes(true));
-            //$predictionNearestK = $classifierKHuman->predict($fire->getIndependentAttributes(true));
-            //$predictionDTree = $classifierDTreeHuman->predict($fire->getIndependentAttributes(true));
-            $predictionRForest = $classifierRForestHuman->predict($fire->getIndependentAttributes(true));
-        }
-
-        $verbose = false;
-
-        if ($verbose) {
-            echo "\n";
-            $fire->prettyPrint();
-            echo "        Predicted cause (Random forest): $predictionRForest\n";
-            //echo "        Predicted cause (Decision tree): $predictionDTree\n";
-            //echo "        Predicted cause (Bayes): $predictionBayes\n";
-            //echo "        Predicted cause (K nearest): $predictionNearestK\n";
-        }
-
-        /*
-        if ($cause == $predictionBayes) {
-            $accuracyBayes++;
-            $accuracyByCause[$cause]["Bayes"]++;
-        }
-        if ($cause == $predictionNearestK) {
-            $accuracyNearestK++;
-            $accuracyByCause[$cause]["NearestK"]++;
-        }
-        if ($cause == $predictionDTree) {
-            $accuracyDTree++;
-            $accuracyByCause[$cause]["DTree"]++;
-        }
-        */
-        if ($cause == $predictionRForest) {
-            $accuracyRForest++;
-            $accuracyByCause[$cause]["RForest"]++;
-        }
+    if ($category == 0) {
+        $predictionRForest = $classifierRForestNatural->predict($fire->getIndependentAttributes(true));
+    }
+    else {
+        $predictionRForest = $classifierRForestHuman->predict($fire->getIndependentAttributes(true));
+    }
+    if ($cause == $predictionRForest) {
+        $accuracyRForest++;
+        $accuracyByCause[$cause]["RForest"]++;
     }
 }
 
-//$pctDTree = floor((float) ($accuracyDTree / $total) * 100);
 $pctRForest = floor((float) ($accuracyRForest / $total) * 100);
-//$pctBayes = floor((float) ($accuracyBayes / $total) * 100);
-//$pctNearestK = floor((float) ($accuracyNearestK / $total) * 100);
 $pctHN = floor((float) ($accuracyHN / $total) * 100);
-$time = new DateTimeImmutable();
-echo $time->format($format) . ": ";
+$importanceHN = $classifierHN->getFeatureImportances();
+$importanceRFHuman = $classifierRForestHuman->getFeatureImportances();
+$importanceRFNatural = $classifierRForestNatural->getFeatureImportances();
+stopwatch("Done.", true);
 echo "$total fires tested, $trainingFires trained\n";
+echo "    Feature importance (H/N):\n";
+foreach ($importanceHN as $element => $importance) {
+    echo "        $element: $importance\n";
+}
+$importanceMatrix = [];
+echo "    Feature importance (Human forest):\n";
+foreach ($importanceRFHuman as $element => $importance) {
+    echo "        $element: $importance\n";
+    $importanceMatrix["human"][$element] = $importance;
+}
+echo "    Feature importance (Natural forest):\n";
+foreach ($importanceRFNatural as $element => $importance) {
+    echo "        $element: $importance\n";
+    $importanceMatrix["natural"][$element] = $importance;
+}
+$serializedImportance = fopen("compleximportances", 'w');
+fwrite($serializedImportance, json_encode($importanceMatrix));
 echo "    Human/natural: $accuracyHN correct, $pctHN% accurate\n";
-/*
-echo "    Bayes: $accuracyBayes correct, $pctBayes% accurate\n";
-foreach ($accuracyByCause as $cause => $algos) {
-    echo "        $cause: " . floor((float)($algos["Bayes"] / $algos["Total"]) * 100) . "%\n";
-}
-echo "    K nearest: $accuracyNearestK correct, $pctNearestK% accurate\n";
-foreach ($accuracyByCause as $cause => $algos) {
-    echo "        $cause: " . floor((float)($algos["NearestK"] / $algos["Total"]) * 100) . "%\n";
-}
-echo "    Decision tree: $accuracyDTree correct, $pctDTree% accurate\n";
-foreach ($accuracyByCause as $cause => $algos) {
-    echo "        $cause: " . floor((float)($algos["DTree"] / $algos["Total"]) * 100) . "%\n";
-}
-*/
 echo "    Random forest: $accuracyRForest correct, $pctRForest% accurate\n";
+$accuracyMatrix = [];
 foreach ($accuracyByCause as $cause => $algos) {
     echo "        $cause:\t";
     if ($cause == "Arson") {
         echo "\t";
     }
-    echo floor((float)($algos["RForest"] / $algos["Total"]) * 100) . "% accuracy\n";
+    $causeAccuracy = floor((float)($algos["RForest"] / $algos["Total"]) * 100);
+    echo "$causeAccuracy%\n";
+    $accuracyMatrix[$cause] = $causeAccuracy;
 }
+$serializedAccuracy = fopen("complexaccuracies.json", 'w');
+fwrite($serializedAccuracy, json_encode($accuracyMatrix));
 ?>

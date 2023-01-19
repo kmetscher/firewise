@@ -10,7 +10,7 @@ class DB extends SQLite3 {
     public function getAllFires(): array {
         $fires = [];
         $stmt = $this->prepare(
-            "SELECT * FROM `Training_Fires` UNION ALL SELECT * FROM `Testing_Fires`;"
+            "SELECT * FROM `Clean_Fires`;"
         );
         $res = $stmt->execute();
         while ($arr = $res->fetchArray()) {
@@ -22,9 +22,7 @@ class DB extends SQLite3 {
 
     public function getFire(int $objectID): ?Fire {
         $stmt = $this->prepare(
-            "SELECT *, date(`DISCOVERY_DATE`) AS `DISCOVERY_DATE`, 
-            date(`CONT_DATE`) AS `CONT_DATE` 
-            FROM `Fires` WHERE `OBJECTID` = :objectID"
+            "SELECT * FROM `Clean_Fires` WHERE `OBJECTID` = :objectID;"
         );
         $stmt->bindValue(":objectID", $objectID, SQLITE3_INTEGER);
         $res = $stmt->execute();
@@ -40,16 +38,24 @@ class DB extends SQLite3 {
         return null;
     }
 
-    public function getTrainingSet(int $classTotal): array {
+    public function getTrainingSet(): array {
         $fires = [];
+        // Retrieve the count of fires with the least common ignition source for balancing
+        $balanceRes = $this->querySingle(
+            "SELECT `STAT_CAUSE_CODE`, COUNT(*) AS `count` 
+            FROM `Clean_Fires` GROUP BY `STAT_CAUSE_CODE` 
+            ORDER BY `count` ASC LIMIT 1;"
+        , true);
+        $testCount = $balanceRes["count"] / 2;
         for ($i = 1; $i < 13; $i++) {
             $stmt = $this->prepare(
-                "SELECT * FROM `Training_Fires` 
+                "SELECT * FROM `Clean_Fires` 
                 WHERE `STAT_CAUSE_CODE` = :causeId
-                LIMIT :classTotal"
+                AND `OBJECTID` % 2 = 0
+                LIMIT :testCount"
             );
             $stmt->bindValue(":causeId", $i, SQLITE3_INTEGER);
-            $stmt->bindValue(":classTotal", $classTotal, SQLITE3_INTEGER);
+            $stmt->bindValue(":testCount", $testCount, SQLITE3_INTEGER);
             $res = $stmt->execute();
             while ($arr = $res->fetchArray()) {
                 $fires[] = new Fire($arr);
@@ -57,16 +63,48 @@ class DB extends SQLite3 {
         }
         return $fires;
     }
-    public function getTestingSet(int $classTotal): array {
+    public function getTestingSet(): array {
         $fires = [];
+        // Retrieve the count of fires with the least common ignition source for balancing
+        $balanceRes = $this->querySingle(
+            "SELECT `STAT_CAUSE_CODE`, COUNT(*) AS `count` 
+            FROM `Clean_Fires` GROUP BY `STAT_CAUSE_CODE` 
+            ORDER BY `count` ASC LIMIT 1;"
+        , true);
+        $testCount = $balanceRes["count"] / 2;
         for ($i = 1; $i < 13; $i++) {
             $stmt = $this->prepare(
-                "SELECT * FROM `Testing_Fires` 
+                "SELECT * FROM `Clean_Fires` 
                 WHERE `STAT_CAUSE_CODE` = :causeId
-                LIMIT :classTotal"
+                AND `OBJECTID` % 2 = 1
+                LIMIT :testCount"
             );
             $stmt->bindValue(":causeId", $i, SQLITE3_INTEGER);
-            $stmt->bindValue(":classTotal", $classTotal, SQLITE3_INTEGER);
+            $stmt->bindValue(":testCount", $testCount, SQLITE3_INTEGER);
+            $res = $stmt->execute();
+            while ($arr = $res->fetchArray()) {
+                $fires[] = new Fire($arr);
+            }
+        }
+        return $fires;
+    }
+    public function getBalancedSet(): array {
+        $fires = [];
+        // Retrieve the count of fires with the least common ignition source for balancing
+        $balanceRes = $this->querySingle(
+            "SELECT `STAT_CAUSE_CODE`, COUNT(*) AS `count` 
+            FROM `Clean_Fires` GROUP BY `STAT_CAUSE_CODE` 
+            ORDER BY `count` ASC LIMIT 1;"
+        , true);
+        $testCount = $balanceRes["count"];
+        for ($i = 1; $i < 13; $i++) {
+            $stmt = $this->prepare(
+                "SELECT * FROM `Clean_Fires` 
+                WHERE `STAT_CAUSE_CODE` = :causeId
+                LIMIT :testCount"
+            );
+            $stmt->bindValue(":causeId", $i, SQLITE3_INTEGER);
+            $stmt->bindValue(":testCount", $testCount, SQLITE3_INTEGER);
             $res = $stmt->execute();
             while ($arr = $res->fetchArray()) {
                 $fires[] = new Fire($arr);

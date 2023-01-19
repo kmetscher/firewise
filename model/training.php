@@ -179,7 +179,7 @@ foreach ($importanceRFNatural as $element => $importance) {
     echo "        $element: $importance\n";
     $importanceMatrix["natural"][$element] = $importance;
 }
-$serializedImportance = fopen("compleximportances", 'w');
+$serializedImportance = fopen("compleximportances.json", 'w');
 fwrite($serializedImportance, json_encode($importanceMatrix));
 echo "    Human/natural: $accuracyHN correct, $pctHN% accurate\n";
 echo "    Random forest: $accuracyRForest correct, $pctRForest% accurate\n";

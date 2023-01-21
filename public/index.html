@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500&family=Bungee+Inline&family=Secular+One&display=swap" rel="stylesheet">
+        <link rel="stylesheet" 
+              href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+              integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" 
+              crossorigin=""/>
+    </head>
+    <body>
+        <header>
+            <div class="title">
+                <h1>fireWise</h1>
+                <div class="front-matter">
+                    <h2>Wildfire Ignition Source Engine</h2>
+                    <h3>Kyle Metscher | Bachelor of Science, Computer Science</h3>
+                    <h3>Western Governors University | Graduation Capstone | 009927377</h3>
+                </div>
+            </div>
+        </header>
+        <div class="tile" v-scope="{}">
+            <div id="map"></div>
+            <a href="https://agafonkin.com/">Support Ukraine and the developer of Leaflet</a>
+            <h2>Give Firewise some info, and it will predict a fire's ignition source.</h2>
+            <h3>Or, choose from wildfires in the database:</h3>
+        </div>
+    </body>
+    <script type="module" src="map.js" defer init>
+    </script>
+</html>

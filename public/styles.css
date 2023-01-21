@@ -1,0 +1,84 @@
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+        scale: 0%;
+    }
+    100% {
+        opacity: 100;
+        scale: 100%;
+    }
+}
+
+:root {
+    --forest-green: #0E320E;
+    --linen: #F9EBE0;
+    --coffee-cream: #A57548;
+    --oxford-blue: #0D2149;
+    --scarlet: #E83D0E;
+}
+
+body {
+    background-color: var(--forest-green);
+    animation: fade-in 1s;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+}
+
+header .title {
+    margin: 1vw 15vw 0 15vw;
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title .front-matter {
+    margin: 1vw;
+}
+
+header h1 {
+    font-family: 'Bungee Inline', sans-serif;
+    color: var(--linen);
+    font-size: 6vw;
+    margin: 0 1vw 0 1vw;
+    padding: 0;
+    border: 0;
+}
+
+header h2 {
+    font-family: 'Secular One';
+    font-size: 1.5vw;
+    color: var(--linen);
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+header h3 {
+    font-family: 'Archivo', sans-serif;
+    font-size: 1vw;
+    color: var(--linen);
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.tile {
+    background-color: var(--linen);
+    margin: 0 15vw 0 15vw;
+    padding: 2.5vw 5vw 2.5vw 5vw;
+}
+
+.tile h2 {
+    color: black;
+    font-size: 1.5vw;
+    font-family: 'Secular One', sans-serif;
+}
+
+#map {
+    height: 35vw;
+}

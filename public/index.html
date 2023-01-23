@@ -13,7 +13,7 @@
     <body>
         <header>
             <div class="title">
-                <h1>fireWise</h1>
+                <h1>Firewise</h1>
                 <div class="front-matter">
                     <h2>Wildfire Ignition Source Engine</h2>
                     <h3>Kyle Metscher | Bachelor of Science, Computer Science</h3>
@@ -21,11 +21,47 @@
                 </div>
             </div>
         </header>
-        <div class="tile" v-scope="{}">
+        <div class="tile" id="map-tile">
             <div id="map"></div>
-            <a href="https://agafonkin.com/">Support Ukraine and the developer of Leaflet</a>
+            <div id="ukraine">
+                <a class="spanish-link" href="https://agafonkin.com/">Support Ukraine and the developer of Leaflet</a>
+            </div>
             <h2>Give Firewise some info, and it will predict a fire's ignition source.</h2>
+            <div class="prediction-field">
+                <h3 v-if="thinking">Thinking...</h3>
+                <h3 v-if="cause">Predicted cause: {{ cause }}</h3>
+            </div>
+            <div class="fire-data">
+                <div class="data-field">
+                    <label name="latitude">Latitude</label><br>
+                    <input v-model="latitude" name="latitude" placeholder="45.5" /><br>
+                </div>
+                <div class="data-field">
+                    <label name="longitude">Longitude</label><br>
+                    <input v-model="longitude" name="longitude" placeholder="-122.5" /><br>
+                </div>
+                <div class="data-field">
+                    <label name="start-date">Start date</label><br>
+                    <input v-model="startDate" name="start-date" placeholder="2001-02-03" type="date"><br>
+                </div>
+                <div class="data-field">
+                    <label name="end-date">End date</label><br>
+                    <input v-model="endDate" name="end-date" placeholder="2001-02-07" type="date"><br>
+                </div>
+                <div class="data-field">
+                    <label name="size">Size (acres)</label><br>
+                    <input v-model="size" placeholder="15.7" /><br>
+                </div>
+                <div class="data-field">
+                    <button @click="getPrediction(latitude, longitude, size, startDate, endDate)">Go</button>
+                </div>
+            </div>
             <h3>Or, choose from wildfires in the database:</h3>
+            <div class="data-field">
+                <label name="fire-id">Fire ID</label><br>
+                <input v-model="fireId" placeholder="57" /><br>
+                <button @click="fetchFire(fireId)">Go</button>
+            </div>
         </div>
     </body>
     <script type="module" src="map.js" defer init>

@@ -12,9 +12,13 @@
 :root {
     --forest-green: #0E320E;
     --linen: #F9EBE0;
-    --coffee-cream: #A57548;
-    --oxford-blue: #0D2149;
+    --cafe-au-lait: #A57548;
+    --cafe-noir: #452914;
+    --spanish-blue: #0070BB;
+    --oxford-blue: #0E1C36;
     --scarlet: #E83D0E;
+    --russian-violet: #3D2557;
+    --smoky-black: #090302;
 }
 
 body {
@@ -67,6 +71,22 @@ header h3 {
     border: 0;
 }
 
+.spanish-link {
+    color: var(--spanish-blue);
+    font-size: 1vw;
+    font-family: "Archivo", sans-serif;
+    transition: all 0.25s;
+}
+
+.spanish-link:hover {
+    color: var(--oxford-blue);
+}
+
+#ukraine {
+    text-align: right;
+    margin: 0 0 0.5vw 0;
+}
+
 .tile {
     background-color: var(--linen);
     margin: 0 15vw 0 15vw;
@@ -76,9 +96,54 @@ header h3 {
 .tile h2 {
     color: black;
     font-size: 1.5vw;
-    font-family: 'Secular One', sans-serif;
+    font-family: 'Secular One', serif;
+    margin: 0.5vw 0 0.5vw 0;
+}
+
+.tile h3 {
+    color: var(--smoky-black);
+    font-size: 1vw;
+    font-family: "Secular One", serif;
+}
+
+.fire-data {
+    display: grid;
+    grid-template-columns: 10vw 10vw 10vw;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.data-field {
+    font-family: "Archivo", sans-serif;
+    font-size: 1vw;
+}
+
+.data-field input {
+    margin: 0.5vw 0 0.5vw 0;
+    font-family: "Archivo", sans-serif;
+    padding: 0.25vw;
+    font-size: 0.75vw;
+    width: 100%;
+}
+
+.data-field button {
+    margin: 0.5vw 0 0.5vw 0;
+    background-color: var(--cafe-au-lait);
+    color: var(--linen);
+    padding: 0.25vw;
+    font-size: 1vw;
+    font-family: "Archivo", sans-serif;
+    border: none;
+    width: 100%;
+    transition: all 0.25s;
+}
+
+.data-field button:hover {
+    background-color: var(--cafe-noir);
+    cursor: pointer;
 }
 
 #map {
-    height: 35vw;
+    height: 30vw;
+    margin: 0 0 0.5vw 0;
 }

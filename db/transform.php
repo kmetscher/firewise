@@ -17,19 +17,14 @@ require_once("../db/weathertransform.php");
 
 $db = new DB();
 
-$ownerCode = 14;
 $statCauseCodeMisc = 9;
 $statCauseCodeUnknown = 13;
 $statCauseCodeChildren = 8;
 
 $noNull = "DELETE FROM `Fires` WHERE 
     `DISCOVERY_DATE` ISNULL OR 
-    `DISCOVERY_TIME` ISNULL OR
     `CONT_DATE` ISNULL OR
-    `CONT_TIME` ISNULL OR
     `DISCOVERY_DOY` ISNULL OR
-    `OWNER_CODE` ISNULL OR
-    `OWNER_CODE` = :ownerCode OR
     `STAT_CAUSE_CODE` ISNULL OR
     `STAT_CAUSE_CODE` = :statCauseCodeMisc OR
     `STAT_CAUSE_CODE` = :statCauseCodeUnknown OR
@@ -55,26 +50,19 @@ else {
 
 $cleanTable = "CREATE TABLE IF NOT EXISTS `Clean_Fires` AS 
     SELECT `OBJECTID`, 
-    `SOURCE_REPORTING_UNIT`, 
-    `SOURCE_REPORTING_UNIT_NAME`, 
     `FIRE_NAME`, 
     date(`DISCOVERY_DATE`) AS `DISCOVERY_DATE`, 
     `DISCOVERY_DOY`, 
-    `DISCOVERY_TIME`, 
     `STAT_CAUSE_CODE`,
     `STAT_CAUSE_DESCR`, 
     date(`CONT_DATE`) AS `CONT_DATE`, 
     `CONT_DOY`, 
-    `CONT_TIME`, 
     `FIRE_SIZE`, 
     `LATITUDE`, 
     `LONGITUDE`, 
-    `OWNER_CODE`, 
-    `OWNER_DESCR`, 
     `STATE`, 
     `COUNTY`,
     `FIPS_NAME`, 
-    `SHAPE` 
     FROM `Fires`";
 
 if ($db->exec($cleanTable)) {

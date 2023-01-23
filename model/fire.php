@@ -47,8 +47,8 @@ class Fire {
         $containmentDate = DateTime::createFromFormat("Y-m-d", $vals["CONT_DATE"]);
 
         // This is an extremely hacky way to deal with weird dataset datetime choices
-        $discoveryDate->setTime(substr($vals["DISCOVERY_TIME"], 0, 2), substr($vals["DISCOVERY_TIME"], 2));
-        $containmentDate->setTime(substr($vals["CONT_TIME"], 0, 2), substr($vals["CONT_TIME"], 2));
+//        $discoveryDate->setTime(substr($vals["DISCOVERY_TIME"], 0, 2), substr($vals["DISCOVERY_TIME"], 2));
+  //      $containmentDate->setTime(substr($vals["CONT_TIME"], 0, 2), substr($vals["CONT_TIME"], 2));
         $this->discoveryDate = DateTimeImmutable::createFromMutable($discoveryDate);
         $this->containmentDate = DateTimeImmutable::createFromMutable($containmentDate); 
 
@@ -66,9 +66,9 @@ class Fire {
         $attrs = [
             $this->latitude, 
             $this->longitude, 
-//            $this->discoveryDate->getTimestamp(),
+            $this->discoveryDate->getTimestamp(),
             $this->discoveryDoy,
-  //          $this->containmentDate->getTimestamp(),
+            $this->containmentDate->getTimestamp(),
             $this->containmentDoy,
             $this->size,
         ];
@@ -93,7 +93,14 @@ class Fire {
     }
 
     public function toJson() {
-    
+        return json_encode([
+            "name" => $this->name,
+            "latitude" => $this->latitude,
+            "longitude" => $this->longitude,
+            "discoveryDate" => $this->discoveryDate->getTimestamp(),
+            "containmentDate" => $this->containmentDate->getTimestamp(),
+            "size" => $this->size,
+        ]);
     }
 }
 

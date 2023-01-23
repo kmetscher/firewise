@@ -66,9 +66,9 @@ class Fire {
         $attrs = [
             $this->latitude, 
             $this->longitude, 
-            $this->discoveryDate->getTimestamp(),
+//            $this->discoveryDate->getTimestamp(),
             $this->discoveryDoy,
-            $this->containmentDate->getTimestamp(),
+  //          $this->containmentDate->getTimestamp(),
             $this->containmentDoy,
             $this->size,
         ];

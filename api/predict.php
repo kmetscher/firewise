@@ -6,36 +6,41 @@ use Phpml\ModelManager;
 function predict(array $args) {
     $mm = new ModelManager();
     $simpleBrain = $mm->restoreFromFile("../model/simple.brain");
-    //$complexBrainHN = $mm->restoreFromFile("../model/firstround.brain");
-    //$complexBrainHuman = $mm->restoreFromFile("../model/secondroundhuman.brain");
-    //$complexBrainNatural = $mm->restoreFromFile("../model/secondroundnatural.brain");
-    $simpleAccuracies = json_decode(fgets(fopen("../model/simpleaccuracies.json", 'r')), true);
-    $complexAccuracies = json_decode(fgets(fopen("../model/complexaccuracies.json", 'r')), true);
+    $complexBrainHN = $mm->restoreFromFile("../model/firstround.brain");
+    $complexBrainHuman = $mm->restoreFromFile("../model/secondroundhuman.brain");
+    $complexBrainNatural = $mm->restoreFromFile("../model/secondroundnatural.brain");
+    $matrixAccuracies = json_decode(fgets(fopen("../model/accuracies.json", 'r')), true);
+    $simpleAccuracies = $matrixAccuracies["simple"]; 
+    $complexAccuracies = $matrixAccuracies["complex"]; 
     $response = [];
     header("Content-Type: application/json");
     http_response_code(200);
     $startTime = new DateTimeImmutable();
 
     try {
-        $discoveryDate = new DateTimeImmutable($args["startDate"]);
-        $contDate = new DateTimeImmutable($args["endDate"]);
+        $discoveryDate = new DateTime();
+        $discoveryDate->setTimestamp($args["startDate"]);
+        $contDate = new DateTime();
+        $contDate->setTimestamp($args["endDate"]);
 
         $fireAttrs = [
             $args["latitude"],
             $args["longitude"],
-            $discoveryDate->getTimestamp(),
+            $args["startDate"],
             (int) $discoveryDate->format("z"),
-            $contDate->getTimestamp(),
+            $args["endDate"],
             (int) $contDate->format("z"),
             $args["size"],
         ];
 
         $simplePrediction = $simpleBrain->predict($fireAttrs);
-        /*$complexFirstPrediction = $complexBrainHN->predict($fireAttrs);
+        $complexFirstPrediction = $complexBrainHN->predict($fireAttrs);
         if ($complexFirstPrediction == 0) {
+            $response["category"] = "naturally-caused";
             $complexSecondPrediction = $complexBrainNatural->predict($fireAttrs);
         }
         else {
+            $response["category"] = "human-caused";
             $complexSecondPrediction = $complexBrainHuman->predict($fireAttrs);
         }
         if ($simpleAccuracies[$simplePrediction] > $complexAccuracies[$complexSecondPrediction]) {
@@ -43,9 +48,24 @@ function predict(array $args) {
         }
         else {
             $finalPrediction = $complexSecondPrediction;
-        }*/
+        }
+        switch ($finalPrediction) {
+            case "Structure":
+                $finalPrediction = "a structure fire";
+                break;
+            case "Debris Burning":
+                $finalPrediction = "burning debris";
+                break;
+            case "Railroad":
+                $finalPrediction = "the railroad";
+                break;
+            case "Powerline":
+                $finalPrediction = "powerline infrastructure";
+                break;
+        }
         
-        $response["prediction"] = $simplePrediction;
+        
+        $response["prediction"] = strtolower($finalPrediction);
 
     }
     catch(Exception $e) {

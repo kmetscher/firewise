@@ -8,6 +8,14 @@
         scale: 100%;
     }
 }
+@keyframes ease-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
 
 :root {
     --forest-green: #0E320E;
@@ -17,13 +25,14 @@
     --spanish-blue: #0070BB;
     --oxford-blue: #0E1C36;
     --scarlet: #E83D0E;
+    --cherry: #D2042D;
     --russian-violet: #3D2557;
     --smoky-black: #090302;
+    --gunmetal: #122C34; 
 }
 
 body {
     background-color: var(--forest-green);
-    animation: fade-in 1s;
 }
 
 header {
@@ -87,10 +96,18 @@ header h3 {
     margin: 0 0 0.5vw 0;
 }
 
+.tile-hidden {
+    margin: 0 15vw 2vw 15vw;
+    padding: 2.5vw 5vw 2.5vw 5vw;
+    opacity: 0%;
+}
+
 .tile {
     background-color: var(--linen);
-    margin: 0 15vw 0 15vw;
+    margin: 0 15vw 2vw 15vw;
     padding: 2.5vw 5vw 2.5vw 5vw;
+    opacity: 100%;
+    animation: fade-in 0.5s;
 }
 
 .tile h2 {
@@ -116,6 +133,7 @@ header h3 {
 .data-field {
     font-family: "Archivo", sans-serif;
     font-size: 1vw;
+    color: var(--smoky-black);
 }
 
 .data-field input {
@@ -141,6 +159,182 @@ header h3 {
 .data-field button:hover {
     background-color: var(--cafe-noir);
     cursor: pointer;
+}
+
+.data-point {
+    color: var(--smoky-black);
+    font-family: "Archivo", sans-serif;
+    font-size: 1vw;
+    margin: 0.5vw 0 0.5vw 0;
+}
+
+.citation {
+    font-family: "Archivo", sans-serif;
+    font-size: 0.75vw;
+    color: var(--smoky-black);
+    text-align: right;
+}
+
+.bar {
+    color: var(--linen);
+    background-color: var(--scarlet);
+    transition: all 0.25s;
+}
+
+.bar-point {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+}
+
+.bar-point label {
+    opacity: 0;
+    margin: 0 0 0 0.5vw;
+    transition: all 0.25s;
+}
+
+.bar-point:hover label {
+    opacity: 100;
+    margin: 0 0 0 0.5vw;
+    transition: all 0.25s;
+}
+
+.bar:hover {
+    background-color: var(--cherry);
+}
+
+.vertical-bar-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    height: 25vw;
+}
+
+.vertical-bar-container .bar-point {
+    display: grid;
+    grid-auto-rows: 24vw 1vw;
+    justify-items: center;
+    align-items: center;
+}
+
+.vertical-bar-container .bar-point label {
+    color: var(--smoky-black);
+    font-family: "Archivo", sans-serif;
+    opacity: 100%;
+    transition: none;
+    flex-grow: 1;
+    margin: 0; 
+}
+
+.vertical-bar-container .bar {
+    background-color: var(--spanish-blue);
+    align-self: baseline;
+    margin-top: auto;
+    width: 100%;
+}
+
+.vertical-bar-container .bar-point .bar:hover {
+    background-color: var(--oxford-blue);
+}
+
+.annual-causes-bar {
+    display: flex;
+    flex-direction: row;
+}
+
+.annual-stat-cause {
+    height: 3vw;
+    margin: 0;
+    flex-grow: 1;
+    transition: all 0.5s;
+}
+
+#doy-graph {
+    display: flex;
+    flex-direction: row;
+    height: 25vw;
+    justify-content: unset;
+}
+
+#doy-graph .bar-point {
+    flex-grow: 1;
+    position: relative;
+}
+
+#doy-graph .bar {
+    background-color: var(--cafe-au-lait);
+    transition: all 0.25s;
+}
+
+#doy-graph .bar-point .bar:hover {
+    background-color: var(--cafe-noir);
+}
+
+#doy-graph label {
+    position: absolute;
+    top: 100%;
+    width: max-content;
+}
+
+.annual-stat-cause:hover, .annual-stat-cause:active {
+    opacity: 75%;
+}
+
+.swatch-label {
+    color: var(--smoky-black);
+    font-family: "Archivo", sans-serif;
+}
+
+.fire-cards {
+    align-items: center;
+    align-content: center;
+    justify-items: space-between;
+    display: grid;
+    grid-template-columns: repeat(3, 33%); 
+}
+
+.fire-card {
+    width: 15vw;
+    margin-bottom: 1vw;
+    background-color: var(--cafe-au-lait);
+    color: linen;
+    padding: 1vw;
+    justify-self: center;
+    align-self: center;
+    transition: all 0.25s;
+    cursor: pointer;
+}
+
+.fire-card p {
+    font-family: "Archivo", sans-serif;
+}
+
+.fire-card:hover {
+    background-color: var(--cafe-noir);
+    transform: scale(1.1);
+}
+
+.state-container-flex {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.state-container {
+    display: grid;
+    grid-template-rows: repeat(8, 4vw);
+    grid-template-columns: repeat(11, minmax(0, 4vw));
+}
+
+.state {
+    margin: 0.25vw;
+    background-color: var(--scarlet);
+    transition: all 0.5s;
+}
+
+.state:hover {
+    transform: scale(1.2);
 }
 
 #map {

@@ -21,24 +21,23 @@
                 </div>
             </div>
         </header>
-        <div class="tile" id="map-tile">
+        <div class="tile-hidden" id="map-tile">
             <div id="map"></div>
             <div id="ukraine">
                 <a class="spanish-link" href="https://agafonkin.com/">Support Ukraine and the developer of Leaflet</a>
             </div>
             <h2>Give Firewise some info, and it will predict a fire's ignition source.</h2>
             <div class="prediction-field">
-                <h3 v-if="thinking">Thinking...</h3>
-                <h3 v-if="cause">Predicted cause: {{ cause }}</h3>
+                <h3 v-if="cause">This fire is probably {{ category }}, with its ignition source related to {{ cause }}.</h3>
             </div>
             <div class="fire-data">
                 <div class="data-field">
                     <label name="latitude">Latitude</label><br>
-                    <input v-model="latitude" name="latitude" placeholder="45.5" /><br>
+                    <input v-model="latitude" @change="setData(latitude, longitude, size, startDate, endDate)" name="latitude" placeholder="45.5" /><br>
                 </div>
                 <div class="data-field">
                     <label name="longitude">Longitude</label><br>
-                    <input v-model="longitude" name="longitude" placeholder="-122.5" /><br>
+                    <input v-model="longitude" @change="setData(latitude, longitude, size, startDate, endDate)" name="longitude" placeholder="-122.5" /><br>
                 </div>
                 <div class="data-field">
                     <label name="start-date">Start date</label><br>
@@ -50,20 +49,79 @@
                 </div>
                 <div class="data-field">
                     <label name="size">Size (acres)</label><br>
-                    <input v-model="size" placeholder="15.7" /><br>
+                    <input v-model="size" @change="setData(latitude, longitude, size, startDate, endDate)" placeholder="15.7" /><br>
                 </div>
                 <div class="data-field">
-                    <button @click="getPrediction(latitude, longitude, size, startDate, endDate)">Go</button>
+                    <h3 v-if="thinking">Thinking...</h3>
+                    <button v-if="!thinking" @click="getPrediction(latitude, longitude, size, startDate, endDate)">Go</button>
                 </div>
             </div>
-            <h3>Or, choose from wildfires in the database:</h3>
-            <div class="data-field">
-                <label name="fire-id">Fire ID</label><br>
-                <input v-model="fireId" placeholder="57" /><br>
-                <button @click="fetchFire(fireId)">Go</button>
+            <h3>Or, choose from some interesting wildfires in the database:</h3>
+            <div class="fire-cards">
+                <div v-for="fire in suggestions" :key="fire.id" @click="setData(fire.latitude, fire.longitude, fire.size, fire.discoveryDate, fire.containmentDate)" class="fire-card">
+                    <h3>{{ fire.name }} ({{ fire.state }})</h3>
+                    <p>Discovered: {{ new Intl.DateTimeFormat('en-US').format(new Date(fire.discoveryDate * 1000)) }}</p>
+                    <p>Contained: {{ new Intl.DateTimeFormat('en-US').format(new Date(fire.containmentDate * 1000)) }}</p>
+                    <p>Size: {{ fire.size }} acres </p>
+                </div>
+            </div>
+        </div>
+        <div class="tile-hidden" id="all-causes-tile">
+            <h2>Wildfires are caused by many different things.</h2>
+            <h3>Some ignition sources are more common than others. Try hovering over/tapping a cause.</h3>
+            <div id="all-causes-graph">
+                <div v-for="entry in causeKV" class="data-point">
+                    <label>{{ entry.cause }}</label><br>
+                    <div class="bar-point">
+                        <div class="bar" :style="{ 'width': entry.pct + '%', 'height': '2vw' }">
+                        </div>
+                        <label>{{ entry.count }} fires</label>
+                    </div>
+                </div>
+            </div>
+            <p class="citation">Short, 2017.</p>
+        </div>
+        <div class="tile-hidden" id="annual-data-tile">
+            <h2>Every year is a little different.</h2>
+            <h3>Wildfires are burning more acres year on year, despite their ignition sources remaining relatively constant.</h3>
+            <div class="vertical-bar-container">
+                <div v-for="year in annualData.years" class="bar-point">
+                    <div class="bar" @mouseover="setYearStats(year)" @click="setYearStats(year)" :style="{ 'height': (year.acresBurned / annualData.max) * 100 + '%' }"></div>
+                    <label>{{ year.year }}</label>
+                </div>
+            </div>
+            <div class="annual-stats-box">
+                <h2 v-if="!yearStats.year">Hover over/tap a year</h2>
+                <h2 v-if="yearStats.year">{{ yearStats.acresBurned }} acres burned in {{ yearStats.year }}</h2>
+                <div class="annual-causes-bar">
+                    <div @mouseover="setFocusedSource(source.cause, source.count)" @click="setFocusedSource(source.cause, source.count)" v-for="source in yearStats.causes" class="annual-stat-cause" :style="{'background-color': getBarColor(source.cause), 'width': source.pct + '%'}"></div>
+                </div>
+                <label class="swatch-label">{{ focusedSource }}</label>
+            </div>
+        </div>
+        <div class="tile-hidden" id="day-of-year-tile">
+            <h2>Fire season sticks out like a sore thumb.</h2>
+            <h3>Hot weather and holidays are a major predictor of wildfire.</h3>
+            <div class="vertical-bar-container" id="doy-graph">
+                <div v-for="doy in doyData" class="bar-point">
+                    <div class="bar" @mouseover="setFocusedDay(doy)" @click="setFocusedDay(doy)" :style="{ 'height': doy.pct + '%' }">
+                    </div>
+                    <label v-if="doy.doy == 185">July 4</label>
+                </div>
+            </div>
+            <label class="swatch-label">{{ focusedDay }}</label>
+        </div>
+        <div class="tile-hidden" id="grid-map-tile">
+            <h2>The West is the best?</h2>
+            <h3>Wildfires occur more often and burn more acres west of the Mississippi.</h3>
+            <h2>{{ focusedState }}</h2>
+            <div class="state-container-flex">
+                <div class="state-container">
+                    <div v-for="entry in stateData" @mouseover="setFocusedState(entry)" @click="setFocusedState(entry)" class="state" :style="getStyle(entry)">
+                    </div>
+                </div>
             </div>
         </div>
     </body>
-    <script type="module" src="map.js" defer init>
-    </script>
+    <script type="module" src="app.js" defer init></script>
 </html>

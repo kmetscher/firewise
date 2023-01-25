@@ -24,11 +24,17 @@ stopwatch("Firing up", true);
 $db = new DB();
 $mm = new ModelManager();
 
-if ($argv[1] == "--with-accuracies" || $argv[1] == "-w") {
-    $withAccuracies = true;
-    stopwatch("Fetching accuracy matrix");
-    $simpleAccuracies = json_decode(fgets(fopen("simpleaccuracies.json", 'r')), true);
-    $complexAccuracies = json_decode(fgets(fopen("complexaccuracies.json", 'r')), true);
+foreach ($argv as $arg) {
+    if ($arg == "--with-accuracies" || $arg == "-w") {
+        $withAccuracies = true;
+        stopwatch("Fetching accuracy matrix");
+        $simpleAccuracies = json_decode(fgets(fopen("simpleaccuracies.json", 'r')), true);
+        $complexAccuracies = json_decode(fgets(fopen("complexaccuracies.json", 'r')), true);
+    }
+    if ($arg == "--verbose" || $arg == "-v") {
+        $verbose = true;
+        stopwatch("Running verbose");
+    }
 }
 
 stopwatch("Fetching fires");
@@ -212,6 +218,10 @@ foreach ($testFires as $fire) {
             $accuracyCombined++;
         }
     }
+    if ($verbose) {
+        $fire->prettyPrint();
+        echo "    Predicted cause: $predictionCombined\n";
+    }
 }
 
 $pctRForest = floor((float) ($accuracyRForest / $total) * 100);
@@ -262,7 +272,7 @@ foreach ($accuracyByCause as $cause => $algos) {
     $accuracyMatrix["complex"][$cause] = $causeAccuracyComplex;
     $accuracyMatrix["simple"][$cause] = $causeAccuracySimple;
 }
-$serializedAccuracy = fopen("complexaccuracies.json", 'w');
+$serializedAccuracy = fopen("accuracies.json", 'w');
 fwrite($serializedAccuracy, json_encode($accuracyMatrix));
 ?>
 

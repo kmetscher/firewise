@@ -1,5 +1,6 @@
 import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
 import * as leaflet from 'https://cdn.skypack.dev/leaflet'
+import makeVisible from "./observer.js";
 
 let map;
 let fireZone;
@@ -15,8 +16,18 @@ const mapTile = createApp({
             endDate: 0,
             fireId: null,
             cause: null,
+            category: null,
             thinking: false,
+            suggestions: null,
         };
+    },
+    watch: {
+        visibility: {
+            handler() {
+                makeVisible("#map-tile");
+            },
+            immediate: true,
+        },
     },
     methods: {
         acreRadius(acres) {
@@ -40,12 +51,12 @@ const mapTile = createApp({
             this.latitude = latitude;
             this.longitude = longitude;
             this.size = size;
-            this.startDate = startDate;
-            this.endDate = endDate;
-            map.flyTo([this.latitude, this.longitude]);
+            this.startDate = new Date(startDate);
+            this.endDate = new Date(endDate);
             fireZone.setLatLng([this.latitude, this.longitude]);
             fireZone.setRadius(this.acreRadius(this.size));
             map.fitBounds(fireZone.getBounds());
+            map.flyTo([this.latitude, this.longitude]);
         },
         getPrediction(latitude, longitude, size, startDate, endDate) {
             this.setData(latitude, longitude, size, startDate, endDate);
@@ -55,8 +66,8 @@ const mapTile = createApp({
                 "latitude": this.latitude,
                 "longitude": this.longitude,
                 "size": this.size,
-                "startDate": new Date(this.startDate).toDateString(),
-                "endDate": new Date(this.endDate).toDateString(),
+                "startDate": this.startDate.valueOf(),
+                "endDate": this.endDate.valueOf(),
             };
             fetch("/api.php", {
                 method: "POST",
@@ -70,6 +81,7 @@ const mapTile = createApp({
                     this.thinking = false;
                     console.log(data)
                     this.cause = data.prediction;
+                    this.category = data.category;
                 })
                 .catch((e) => console.error(e));
         },
@@ -82,9 +94,19 @@ const mapTile = createApp({
                 })
                 .catch((e) => console.error(e));
         },
+        fetchSuggestions() {
+            fetch("/api.php?suggest=1")
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data);
+                    this.suggestions = data;
+                })
+                .catch((e) => console.error(e));
+        },
     },
     mounted() {
         this.constructMap();
+        this.fetchSuggestions();
     },
 });
 

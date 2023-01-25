@@ -1,7 +1,7 @@
 <?php
 
 class Fire {
-    private int $id;
+    public int $id;
     private string $name;
 
     private int $categoryId;
@@ -15,7 +15,7 @@ class Fire {
     private DateTimeImmutable $containmentDate;
     private int $containmentDoy;
 
-    private float $size;
+    public float $size;
     private float $latitude;
     private float $longitude;
     
@@ -46,9 +46,6 @@ class Fire {
         $discoveryDate = DateTime::createFromFormat("Y-m-d", $vals["DISCOVERY_DATE"]);
         $containmentDate = DateTime::createFromFormat("Y-m-d", $vals["CONT_DATE"]);
 
-        // This is an extremely hacky way to deal with weird dataset datetime choices
-//        $discoveryDate->setTime(substr($vals["DISCOVERY_TIME"], 0, 2), substr($vals["DISCOVERY_TIME"], 2));
-  //      $containmentDate->setTime(substr($vals["CONT_TIME"], 0, 2), substr($vals["CONT_TIME"], 2));
         $this->discoveryDate = DateTimeImmutable::createFromMutable($discoveryDate);
         $this->containmentDate = DateTimeImmutable::createFromMutable($containmentDate); 
 
@@ -95,11 +92,14 @@ class Fire {
     public function toJson() {
         return json_encode([
             "name" => $this->name,
+            "id" => $this->id,
             "latitude" => $this->latitude,
             "longitude" => $this->longitude,
             "discoveryDate" => $this->discoveryDate->getTimestamp(),
             "containmentDate" => $this->containmentDate->getTimestamp(),
             "size" => $this->size,
+            "state" => $this->state,
+            "cause" => $this->cause,
         ]);
     }
 }

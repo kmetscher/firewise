@@ -96,7 +96,7 @@
                 <div class="annual-causes-bar">
                     <div @mouseover="setFocusedSource(source.cause, source.count)" @click="setFocusedSource(source.cause, source.count)" v-for="source in yearStats.causes" class="annual-stat-cause" :style="{'background-color': getBarColor(source.cause), 'width': source.pct + '%'}"></div>
                 </div>
-                <label class="swatch-label">{{ focusedSource }}</label>
+                <label class="swatch-label">{{ focusedSource ? focusedSource : "Hover over/tap an element"}}</label>
             </div>
         </div>
         <div class="tile-hidden" id="day-of-year-tile">

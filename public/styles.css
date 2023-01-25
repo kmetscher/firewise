@@ -341,3 +341,295 @@ header h3 {
     height: 30vw;
     margin: 0 0 0.5vw 0;
 }
+
+@media screen and (max-width: 768px) {
+    header {
+        display: flex;
+        justify-content: center;
+    }
+
+    header .title {
+        margin: 1vw; 
+        display: flex;
+        flex-direction: column;
+        justify-items: center;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .title .front-matter {
+        display: none;
+    }
+
+    header h1 {
+        font-family: 'Bungee Inline', sans-serif;
+        color: var(--linen);
+        font-size: 15vw;
+        margin: 1vw;
+        padding: 0;
+        border: 0;
+    }
+
+    .spanish-link {
+        color: var(--spanish-blue);
+        font-size: 3vw;
+        font-family: "Archivo", sans-serif;
+        transition: all 0.25s;
+    }
+
+    .spanish-link:hover {
+        color: var(--oxford-blue);
+    }
+
+    #ukraine {
+        display: none;
+    }
+
+    .tile-hidden {
+        padding: 2.5vw 5vw 2.5vw 5vw;
+        opacity: 0%;
+    }
+
+    .tile {
+        margin: 2vw;
+        background-color: var(--linen);
+        padding: 2.5vw;
+        opacity: 100%;
+        animation: fade-in 0.5s;
+    }
+
+    .tile h2 {
+        color: black;
+        font-size: 5vw;
+        font-family: 'Secular One', serif;
+        margin: 0.5vw 0 0.5vw 0;
+    }
+
+    .tile h3 {
+        color: var(--smoky-black);
+        font-size: 4vw;
+        font-family: "Secular One", serif;
+    }
+
+    .fire-data {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .data-field {
+        font-family: "Archivo", sans-serif;
+        font-size: 4vw;
+        color: var(--smoky-black);
+        margin: 1vw 0 1vw 0;
+    }
+
+    .data-field input {
+        font-family: "Archivo", sans-serif;
+        padding: 2vw;
+        font-size: 3vw;
+        width: 80vw;
+    }
+
+    .data-field button {
+        background-color: var(--cafe-au-lait);
+        color: var(--linen);
+        padding: 2vw;
+        font-size: 4vw;
+        font-family: "Archivo", sans-serif;
+        border: none;
+        width: 80vw;
+        transition: all 0.25s;
+    }
+
+    .data-field button:active {
+        background-color: var(--cafe-noir);
+        cursor: pointer;
+    }
+
+    .data-point {
+        color: var(--smoky-black);
+        font-family: "Archivo", sans-serif;
+        font-size: 4vw;
+    }
+
+    .citation {
+        font-family: "Archivo", sans-serif;
+        font-size: 3vw;
+        color: var(--smoky-black);
+        text-align: right;
+    }
+
+    .bar {
+        color: var(--linen);
+        background-color: var(--scarlet);
+        transition: all 0.25s;
+    }
+
+    #all-causes-graph .bar {
+        height: 9vw !important;
+    }
+
+    .bar-point {
+        height: 10vw;
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        align-items: center;
+    }
+
+    .bar-point label {
+        font-size: 4vw;
+        opacity: 0;
+        margin: 1vw;
+        transition: all 0.25s;
+    }
+
+    .bar-point:hover label {
+        opacity: 100;
+        margin: 0 0 0 0.5vw;
+        transition: all 0.25s;
+    }
+
+    .bar:hover {
+        background-color: var(--cherry);
+    }
+
+    .vertical-bar-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        height: 80vw;
+    }
+
+    .vertical-bar-container .bar-point {
+        display: grid;
+        grid-auto-rows: 70vw 10vw;
+        justify-items: center;
+        align-items: center;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+
+    .vertical-bar-container .bar-point label {
+        opacity: 100%;
+        flex-grow: 1;
+        writing-mode: vertical-rl;
+        font-size: 2.75vw;
+    }
+
+    .vertical-bar-container .bar {
+        background-color: var(--spanish-blue);
+        align-self: baseline;
+        margin-top: auto;
+        width: 100%;
+    }
+
+    .vertical-bar-container .bar-point .bar:hover {
+        background-color: var(--oxford-blue);
+    }
+
+    .annual-causes-bar {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .annual-stat-cause {
+        height: 9vw;
+        margin: 0;
+        flex-grow: 1;
+        transition: all 0.5s;
+    }
+
+    #doy-graph {
+        display: flex;
+        flex-direction: row;
+        height: 80vw;
+        justify-content: unset;
+    }
+
+    #doy-graph .bar-point {
+        flex-grow: 1;
+        position: relative;
+    }
+
+    #doy-graph .bar {
+        background-color: var(--cafe-au-lait);
+        transition: all 0.25s;
+    }
+
+    #doy-graph .bar-point .bar:hover {
+        background-color: var(--cafe-noir);
+    }
+
+    #doy-graph label {
+        position: absolute;
+        top: 400%;
+        font-size: 3vw;
+        writing-mode: initial;
+    }
+
+    .annual-stat-cause:hover, .annual-stat-cause:active {
+        opacity: 75%;
+    }
+
+    .swatch-label {
+        color: var(--smoky-black);
+        font-family: "Archivo", sans-serif;
+        font-size: 4vw;
+    }
+
+    .fire-cards {
+        align-items: center;
+        align-content: center;
+        justify-items: space-between;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .fire-card {
+        width: 40vw;
+        margin: 1vw;
+        background-color: var(--cafe-au-lait);
+        justify-self: center;
+        align-self: center;
+        transition: all 0.25s;
+        cursor: pointer;
+    }
+
+    .fire-card p {
+        display: none;
+    }
+
+    .fire-card:active {
+        background-color: var(--cafe-noir);
+        transform: scale(1.1);
+    }
+
+    .state-container-flex {
+        display: flex;
+        justify-content: center;
+        align-content: center;
+    }
+
+    .state-container {
+        display: grid;
+        grid-template-rows: repeat(8, 8vw);
+        grid-template-columns: repeat(11, minmax(0, 8vw));
+    }
+
+    .state {
+        margin: 0.5vw;
+        background-color: var(--scarlet);
+        transition: all 0.5s;
+    }
+
+    .state:hover {
+        transform: scale(1.2);
+    }
+
+    #map {
+        height: 60vw;
+        margin: 0 0 1vw 0;
+    }
+}

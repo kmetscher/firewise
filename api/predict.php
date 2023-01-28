@@ -19,16 +19,18 @@ function predict(array $args) {
 
     try {
         $discoveryDate = new DateTime();
-        $discoveryDate->setTimestamp($args["startDate"]);
+        $ecmaDiscoveryDate = $args["startDate"] / 1000;
+        $discoveryDate->setTimestamp($ecmaDiscoveryDate);
         $contDate = new DateTime();
-        $contDate->setTimestamp($args["endDate"]);
+        $ecmaContDate = $args["endDate"] / 1000;
+        $contDate->setTimestamp($ecmaContDate);
 
         $fireAttrs = [
             $args["latitude"],
             $args["longitude"],
-            $args["startDate"],
+            $ecmaDiscoveryDate,
             (int) $discoveryDate->format("z"),
-            $args["endDate"],
+            $ecmaContDate,
             (int) $contDate->format("z"),
             $args["size"],
         ];

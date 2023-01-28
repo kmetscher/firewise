@@ -35,6 +35,25 @@ body {
     background-color: var(--forest-green);
 }
 
+p {
+    font-family: "Archivo", sans-serif;
+    color: var(--smoky-black);
+}
+
+a {
+    font-family: "Archivo", sans-serif;
+    color: var(--oxford-blue);
+    transition: all 0.25s;
+}
+
+a:hover, a:active, a:visited:hover, a:visited:active {
+    color: var(--spanish-blue);
+}
+
+a:visited {
+    color: var(--russian-violet);
+}
+
 header {
     display: flex;
     justify-content: center;
@@ -173,6 +192,7 @@ header h3 {
     font-size: 0.75vw;
     color: var(--smoky-black);
     text-align: right;
+    display: block;
 }
 
 .bar {

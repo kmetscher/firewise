@@ -4,6 +4,9 @@ require_once("../api/predict.php");
 require_once("../api/suggestfires.php");
 require_once("../api/analysis.php");
 
+header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: GET,POST");
+
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     if ($_GET["suggest"]) {
         getSuggestions();
@@ -14,6 +17,9 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     }
     else if ($_GET["analysis"]) {
         analysis($_GET["analysis"]);
+    }
+    else {
+        http_response_code(400);
     }
 }
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

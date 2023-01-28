@@ -41,11 +41,11 @@
                 </div>
                 <div class="data-field">
                     <label name="start-date">Start date</label><br>
-                    <input v-model="startDate" name="start-date" placeholder="2001-02-03" type="date"><br>
+                    <input :value="startDate" @input="e => startDate = fixDate(e.target.value)" name="start-date" placeholder="2001-02-03" type="date"><br>
                 </div>
                 <div class="data-field">
                     <label name="end-date">End date</label><br>
-                    <input v-model="endDate" name="end-date" placeholder="2001-02-07" type="date"><br>
+                    <input :value="endDate" @input="e => endDate = fixDate(e.target.value)" name="end-date" placeholder="2001-02-07" type="date"><br>
                 </div>
                 <div class="data-field">
                     <label name="size">Size (acres)</label><br>
@@ -68,7 +68,9 @@
         </div>
         <div class="tile-hidden" id="all-causes-tile">
             <h2>Wildfires are caused by many different things.</h2>
-            <h3>Some ignition sources are more common than others. Try hovering over/tapping a cause.</h3>
+            <h3>Some ignition sources are more common than others.</h3>
+            <p>The statistics listed here and in other tiles are from a cleaned version of the 2017 FPA FOD wildfire dataset, containing over 1.8 million wildfires from 1992 to 2015. The subset used here contains approximately 500,000 of such fires.</p>
+            <p>Try hovering over/tapping an ignition source.</p>
             <div id="all-causes-graph">
                 <div v-for="entry in causeKV" class="data-point">
                     <label>{{ entry.cause }}</label><br>
@@ -79,11 +81,12 @@
                     </div>
                 </div>
             </div>
-            <p class="citation">Short, 2017.</p>
+            <a class="citation" href="#short2017">Short, 2017.</a>
         </div>
         <div class="tile-hidden" id="annual-data-tile">
             <h2>Every year is a little different.</h2>
             <h3>Wildfires are burning more acres year on year, despite their ignition sources remaining relatively constant.</h3>
+            <p>Since the 1990s, the number of acres burned by fire has approximately doubled. More recent statistics from the Forest Service and Department of Interior list over 10 million acres burned in 2020. This trend continues despite the total number of fires declining.</p>
             <div class="vertical-bar-container">
                 <div v-for="year in annualData.years" class="bar-point">
                     <div class="bar" @mouseover="setYearStats(year)" @click="setYearStats(year)" :style="{ 'height': (year.acresBurned / annualData.max) * 100 + '%' }"></div>
@@ -98,22 +101,37 @@
                 </div>
                 <label class="swatch-label">{{ focusedSource ? focusedSource : "Hover over/tap an element"}}</label>
             </div>
+            <a class="citation" href="#hooverhanson2022">Hoover & Hanson, 2021.</a>
+            <a class="citation" href="#short2017">Short, 2017.</a>
         </div>
         <div class="tile-hidden" id="day-of-year-tile">
             <h2>Fire season sticks out like a sore thumb.</h2>
             <h3>Hot weather and holidays are a major predictor of wildfire.</h3>
+            <p>July 4th is often the busiest day for the total number of wildfires sparked, likely due to firework celebrations of Independence Day, though not necessarily for acres burned.</p>
+            <p>Year on year, fire season is beginning to start earlier and stick around longer; burned acreage tended to peak in August from the 1980s to the 2000s, but now tends to peak in July.</p>
+            <p>Wildfires also start showing up in significant numbers as early as February, contributing to the early peak observed in the spring.</p>
             <div class="vertical-bar-container" id="doy-graph">
                 <div v-for="doy in doyData" class="bar-point">
                     <div class="bar" @mouseover="setFocusedDay(doy)" @click="setFocusedDay(doy)" :style="{ 'height': doy.pct + '%' }">
                     </div>
+                    <label v-if="doy.doy == 1">Jan 1</label>
                     <label v-if="doy.doy == 185">July 4</label>
+                    <label v-if="doy.doy == 79">Mar 20</label>
+                    <label v-if="doy.doy == 265">Sep 22</label>
+                    <label v-if="doy.doy == 355">Dec 21</label>
                 </div>
             </div>
+            <br>
             <label class="swatch-label">{{ focusedDay }}</label>
+            <a class="citation" href="#epa2022">EPA, 2022.</a>
+            <a class="citation" href="#forestservice2022">Forest Service, 2022.</a>
+            <a class="citation" href="#short2017">Short, 2017.</a>
         </div>
         <div class="tile-hidden" id="grid-map-tile">
             <h2>The West is the best?</h2>
             <h3>Wildfires occur more often and burn more acres west of the Mississippi.</h3>
+            <p>California and Alaska bear the lion's share, with established firesheds in Washington, Oregon, Idaho, Montana, Utah, Arizona, New Mexico, and Texas demonstrating increased burn severity and threatened regions.</p>
+            <p>Pockets of fire activity outside the continental West include Georgia and Florida.<p>
             <h2>{{ focusedState }}</h2>
             <div class="state-container-flex">
                 <div class="state-container">
@@ -121,6 +139,34 @@
                     </div>
                 </div>
             </div>
+            <br>
+            <a class="citation" href="#epa2022">EPA, 2022.</a>
+            <a class="citation" href="#hooverhanson2022">Hoover & Hanson, 2021.</a>
+            <a class="citation" href="#short2017">Short, 2017.</a>
+        </div>
+        <div class="tile-hidden" id="sources-tile">
+            <h2>Acknowledgments</h2>
+            <h3>References</h3>
+            <p id="epa2022">Environmental Protection Agency. (2022, August 1). <i>Climate change indicators: Wildfires.</i> <a href="https://www.epa.gov/climate-indicators/climate-change-indicators-wildfires">https://www.epa.gov/climate-indicators/climate-change-indicators-wildfires</a></p>
+            <p id="hooverhanson2022">Hoover, K., & Hanson, L. A. (2021). <i>Wildfire statistics.</i> Congressional Research Service. <a href="https://apps.dtic.mil/sti/citations/AD1143321">https://apps.dtic.mil/sti/citations/AD1143321</a><p>
+            <p id="short2017">Short, K. (2017). <i>Spatial wildfire occurrence data for the United States, 1992-2015</i> (4th ed.) [Data set]. Forest Service Research Data Archive. <a href="https://doi.org/10.2737/RDS-2013-0009.4">https://doi.org/10.2737/RDS-2013-0009.4</a></p>
+            <p id="forestservice2022">United States Forest Service (2022). <i>Monitoring Trends in Burn Severity </i>[Data set]. United States Department of Agriculture. <a href="https://www.mtbs.gov/direct-download">https://www.mtbs.gov/direct-download</a></p>
+            <h3>Tools</h3>
+            <p>Firewise was made with love with:</p>
+            <ul>
+                <li><a href="https://coolors.co/">Coolors</a></li>
+                <li><a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a></li>
+                <li><a href="https://neovim.io/">Neovim</a></li>
+                <li><a href="https://www.php.net/">PHP</a></li>
+                <li><a href="https://www.sqlite.org/index.html">SQLite</a></li>
+                <li><a href="https://ubuntu.com/">Ubuntu GNU/Linux</a></li>
+                <li><a href="https://vuejs.org/">Vue</a></li>
+            </ul>
+            <h3>Constraints</h3>
+            <p>The model is heavily biased towards suggesting structure fires as the ignition source for fires outside of its date range (1992-2015). This has some merit, due to the rapid increase in structure fires relative to their total amount year on year, but should be addressed before using this model in a sensitive context.</p>
+            <p>Specific ignition sources related to infrastructure damage or industrial incidents are glossed under categories such as "Equipment Use" or "Railroad." A more granular accounting of these ignition sources is complicated, and quality data at the national level is not readily available to make distinctions.</p>
+            <p>The total number of fires used for training the model and analysis is significantly lower than the 1.8 million fires contained in the original Short set following cleaning to remove fire entries missing parameters such as end date, size, location, or identified cause.</p>
+            <p>Wildfires are the primary concern of this model. Fires in an urban setting are caused by far more diverse ignition sources and cover much smaller surface areas, making this model unsuitable for analyzing them.</p>
         </div>
     </body>
     <script type="module" src="app.js" defer init></script>

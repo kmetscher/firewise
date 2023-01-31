@@ -46,6 +46,11 @@ a {
     transition: all 0.25s;
 }
 
+li {
+    font-family: "Archivo", sans-serif;
+    color: var(--smoky-black);
+}
+
 a:hover, a:active, a:visited:hover, a:visited:active {
     color: var(--spanish-blue);
 }

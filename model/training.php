@@ -24,12 +24,15 @@ stopwatch("Firing up", true);
 $db = new DB();
 $mm = new ModelManager();
 
+$verbose = false;
+
 foreach ($argv as $arg) {
     if ($arg == "--with-accuracies" || $arg == "-w") {
         $withAccuracies = true;
         stopwatch("Fetching accuracy matrix");
-        $simpleAccuracies = json_decode(fgets(fopen("simpleaccuracies.json", 'r')), true);
-        $complexAccuracies = json_decode(fgets(fopen("complexaccuracies.json", 'r')), true);
+        $accuracies = json_decode(fgets(fopen("accuracies.json", 'r')), true);
+        $simpleAccuracies = $accuracies["simple"];
+        $complexAccuracies = $accuracies["complex"]; 
     }
     if ($arg == "--verbose" || $arg == "-v") {
         $verbose = true;

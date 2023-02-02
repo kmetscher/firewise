@@ -96,6 +96,7 @@ const mapTile = createApp({
                 })
                 .catch((e) => {
                     this.error = true; 
+                    this.thinking = false;
                     console.log(e)
                 });
         },

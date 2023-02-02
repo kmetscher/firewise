@@ -1,4 +1,4 @@
-import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js";
 import * as leaflet from 'https://cdn.skypack.dev/leaflet'
 import makeVisible from "./observer.js";
 

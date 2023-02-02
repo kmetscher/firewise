@@ -47,10 +47,10 @@ $trainFires = array_slice($fires, 0, floor(sizeof($fires) * 0.66));
 $testFires = array_slice($fires, floor(sizeof($fires) * 0.66));
 stopwatch("Done (" . sizeof($trainFires) . ")");
 
-$classifierHN = new RandomForest(100);
-$classifierSimple = new RandomForest(100);
-$classifierRForestHuman = new RandomForest(100);
-$classifierRForestNatural = new RandomForest(100);
+$classifierHN = new RandomForest(50);
+$classifierSimple = new RandomForest(50);
+$classifierRForestHuman = new RandomForest(50);
+$classifierRForestNatural = new RandomForest(50);
 
 $humanSamples = [];
 $naturalSamples = [];

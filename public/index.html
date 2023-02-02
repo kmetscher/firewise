@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="styles.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -9,6 +10,7 @@
               href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
               integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" 
               crossorigin=""/>
+        <title>Firewise | Kyle Metscher</title>
     </head>
     <body>
         <header>
@@ -29,36 +31,37 @@
             <h2>Give Firewise some info, and it will predict a fire's ignition source.</h2>
             <div class="prediction-field">
                 <h3 v-if="cause">This fire is probably {{ category }}, with its ignition source related to {{ cause }}.</h3>
+                <h3 v-if="error">Something went wrong; try again or contact me if it seems broken.</h3>
             </div>
             <div class="fire-data">
                 <div class="data-field">
                     <label name="latitude">Latitude</label><br>
-                    <input v-model="latitude" @change="setData(latitude, longitude, size, startDate, endDate)" name="latitude" placeholder="45.5" /><br>
+                    <input v-model="latitude" @change="setLatLongSize(latitude, longitude, size)" name="latitude" placeholder="45.5" /><br>
                 </div>
                 <div class="data-field">
                     <label name="longitude">Longitude</label><br>
-                    <input v-model="longitude" @change="setData(latitude, longitude, size, startDate, endDate)" name="longitude" placeholder="-122.5" /><br>
+                    <input v-model="longitude" @change="setLatLongSize(latitude, longitude, size)" name="longitude" placeholder="-122.5" /><br>
                 </div>
                 <div class="data-field">
                     <label name="start-date">Start date</label><br>
-                    <input :value="startDate" @input="e => startDate = fixDate(e.target.value)" name="start-date" placeholder="2001-02-03" type="date"><br>
+                    <input v-model="startDate" name="start-date" placeholder="2001-02-03" type="date"><br>
                 </div>
                 <div class="data-field">
                     <label name="end-date">End date</label><br>
-                    <input :value="endDate" @input="e => endDate = fixDate(e.target.value)" name="end-date" placeholder="2001-02-07" type="date"><br>
+                    <input v-model="endDate" name="end-date" placeholder="2001-02-07" type="date"><br>
                 </div>
                 <div class="data-field">
                     <label name="size">Size (acres)</label><br>
-                    <input v-model="size" @change="setData(latitude, longitude, size, startDate, endDate)" placeholder="15.7" /><br>
+                    <input v-model="size" @change="setLatLongSize(latitude, longitude, size)" placeholder="15.7" /><br>
                 </div>
                 <div class="data-field">
                     <h3 v-if="thinking">Thinking...</h3>
-                    <button v-if="!thinking" @click="getPrediction(latitude, longitude, size, startDate, endDate)">Go</button>
+                    <button v-if="!thinking" @click="getPrediction()">Go</button>
                 </div>
             </div>
             <h3>Or, choose from some interesting wildfires in the database:</h3>
             <div class="fire-cards">
-                <div v-for="fire in suggestions" :key="fire.id" @click="setData(fire.latitude, fire.longitude, fire.size, fire.discoveryDate, fire.containmentDate)" class="fire-card">
+                <div v-for="fire in suggestions" :key="fire.id" @click="setFireData(fire.latitude, fire.longitude, fire.size, new Intl.DateTimeFormat('en-US').format(new Date(fire.discoveryDate * 1000)), new Intl.DateTimeFormat('en-US').format(new Date(fire.containmentDate * 1000)))" class="fire-card">
                     <h3>{{ fire.name }} ({{ fire.state }})</h3>
                     <p>Discovered: {{ new Intl.DateTimeFormat('en-US').format(new Date(fire.discoveryDate * 1000)) }}</p>
                     <p>Contained: {{ new Intl.DateTimeFormat('en-US').format(new Date(fire.containmentDate * 1000)) }}</p>
@@ -152,7 +155,7 @@
             <p id="short2017">Short, K. (2017). <i>Spatial wildfire occurrence data for the United States, 1992-2015</i> (4th ed.) [Data set]. Forest Service Research Data Archive. <a href="https://doi.org/10.2737/RDS-2013-0009.4">https://doi.org/10.2737/RDS-2013-0009.4</a></p>
             <p id="forestservice2022">United States Forest Service (2022). <i>Monitoring Trends in Burn Severity </i>[Data set]. United States Department of Agriculture. <a href="https://www.mtbs.gov/direct-download">https://www.mtbs.gov/direct-download</a></p>
             <h3>Tools</h3>
-            <p>Firewise was made with ❤️ with the following open-source tools:</p>
+            <p>Firewise was made with love with the following open-source tools:</p>
             <ul>
                 <li><a href="https://coolors.co/">Coolors</a></li>
                 <li><a href="https://getcomposer.org/">Composer</a></li>

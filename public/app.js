@@ -18,6 +18,7 @@ const mapTile = createApp({
             cause: null,
             category: null,
             thinking: false,
+            error: false,
             suggestions: null,
         };
     },
@@ -49,32 +50,35 @@ const mapTile = createApp({
         },
         fixDate(date) {
             // I hate JavaScript so much it's unreal
-            return new Date(date).valueOf() / 1000;
+            return new Date(date).valueOf();
         },
-        setData(latitude, longitude, size, startDate, endDate) {
+        setLatLongSize(latitude, longitude, size) {
             this.latitude = latitude;
             this.longitude = longitude;
             this.size = size;
-            this.startDate = new Date(startDate);
-            this.endDate = new Date(endDate);
-            console.log(this.latitude, this.longitude, this.size, this.startDate, this.endDate);
             fireZone.setLatLng([this.latitude, this.longitude]);
             fireZone.setRadius(this.acreRadius(this.size));
             map.fitBounds(fireZone.getBounds());
             map.flyTo([this.latitude, this.longitude]);
         },
-        getPrediction(latitude, longitude, size, startDate, endDate) {
-            console.log(this.latitude, this.longitude, this.size, this.startDate, this.endDate);
-            this.setData(latitude, longitude, size, startDate, endDate);
-            console.log(this.latitude, this.longitude, this.size, this.startDate, this.endDate);
+        setDates(startDate, endDate) {
+            this.startDate = new Date(startDate);
+            this.endDate = new Date(endDate);
+        },
+        setFireData(latitude, longitude, size, startDate, endDate) {
+            this.setLatLongSize(latitude, longitude, size);
+            this.setDates(startDate, endDate);
+        },
+        getPrediction() {
             this.cause = null;
+            this.error = false;
             this.thinking = true;
             const attrs = {
                 "latitude": this.latitude,
                 "longitude": this.longitude,
                 "size": this.size,
-                "startDate": this.startDate.valueOf(),
-                "endDate": this.endDate.valueOf(),
+                "startDate": new Date(this.startDate).getTime(),
+                "endDate": new Date(this.endDate).getTime(),
             };
             fetch("/api.php", {
                 method: "POST",
@@ -90,12 +94,16 @@ const mapTile = createApp({
                     this.cause = data.prediction;
                     this.category = data.category;
                 })
+                .catch((e) => {
+                    this.error = true; 
+                    console.log(e)
+                });
         },
         fetchFire(fireId) {
             fetch("/api.php?fireId=" + fireId)
                 .then((res) => res.json())
                 .then((data) => {
-                    this.setData(data.latitude, data.longitude, data.size, data.discoveryDate, data.containmentDate);
+                    this.setLatLongSize(data.latitude, data.longitude, data.size);
                 })
         },
         fetchSuggestions() {
